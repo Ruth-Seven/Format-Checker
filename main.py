@@ -30,6 +30,7 @@ def extract(keyword, para_list):
 
     return refer_list
 
+
 def check(refer_list):
     print("对参考文件进行格式检查")
     # 对引用部分提取匹配
