@@ -14,3 +14,9 @@ docx2python
 python -m pip install pywin32 docx2python
 
 ```
+
+## 运行
+
+```shell script
+python main.py test.docx
+```
