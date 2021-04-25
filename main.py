@@ -1,45 +1,7 @@
-# # coding:utf-8
-#
-# from win32com import client as wc
-# from docx import Document
-#
-# word = wc.Dispatch('Word.Application')
-# doc = word.Documents.Open(u'C:/Users/Kurko/Desktop/用来测试的论文/需要检查的论文/硕士学位论文正文_1.doc')        # 目标路径下的文件
-# doc.SaveAs(u'C:/Users/Kurko/Desktop/用来测试的论文/需要检查的论文/硕士学位论文正文_1.docx', 12, False, "", True, "", False, False, False, False)  # 转化后路径下的文件
-# doc.Close()
-# word.Quit()
-#
-# doc = Document('C:/Users/Kurko/Desktop/用来测试的论文/需要检查的论文/硕士学位论文正文_1.docx')
-#
-# pos1=None
-# pos2=None
-#
-# for i in range(len(doc.paragraphs)):
-#     print(doc.paragraphs[i].text.strip())
-#     if doc.paragraphs[i].text.strip()=="参考文献":
-#         pos1=i
-#     if pos1 is not None and doc.paragraphs[i].text.strip()== "":
-#         pos2=i
-#         break
-# print(pos1, pos2)
-# for i in range(pos1, pos2+1):
-#     print(i, doc.paragraphs[i].text)
-# literList=[]
-
 from win32com import client as wc
 import re
 import sys
-
-
-def preproccess_file(file):
-    '''文件预处理'''
-    # 对文件内容预处理(把文本集中到一个字符串中）
-
-    para_list = []
-    for idx, para in enumerate(file.paragraphs):
-        print(para.text)
-        para_list.append(para)
-    return para_list
+from docx2python import docx2python
 
 
 def extract(keyword, para_list):
@@ -50,22 +12,29 @@ def extract(keyword, para_list):
 
     for idx, para in enumerate(para_list):
         if not is_reference:
-            result = re.match('{}'.format(keyword), para.text)
-            if result:
+            result = re.match('{}'.format(keyword), para.strip())
+            if result and len(para.strip()) == 4:
                 is_reference = True
         elif is_reference:
-            if para.text.strip() == "":
+            if para.strip() == "" or para.strip() == "作者简历":
                 break
-            print(para.text)
-            if para.text.strip()[0] != '[':
+            if not (para.strip()[0] == '[' or '0' <= para.strip()[0] <= '9'):
                 curLen = len(refer_list)
-                refer_list[curLen - 1] += para.text
+                refer_list[curLen - 1] += para
             else:
-                refer_list.append(para.text)
+                refer_list.append(para)
     for i in range(len(refer_list)):
-        print(i, refer_list[i])
+        print(refer_list[i])
 
     return refer_list
+
+
+def checkNum(refer_list):
+    print("对参考文献篇数进行检查")
+    print("篇数为：" + str(len(refer_list)))
+    if len(refer_list) < 20:
+        return False
+    return True
 
 
 def check(refer_list):
@@ -113,11 +82,17 @@ def main(path):
         return
 
     keyword = '参考文献'
-    word = wc.Dispatch('Word.Application')
-    print(real_path)
-    file = word.Documents.Open(path)
-    file_text = preproccess_file(file)
-    reference = extract(keyword, file_text)
+    file = docx2python(real_path)
+    temp = file.text.split('\n')
+    content = []
+    for i in range(len(temp)):
+        if i % 2 == 0:
+            content.append(temp[i])
+
+    # 可以输出reference看看，已经是text了
+    reference = extract(keyword, content)
+    if not checkNum(reference):
+        print("参考文献篇数少于20篇！")
     check(reference)
 
 
