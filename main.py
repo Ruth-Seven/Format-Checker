@@ -5,7 +5,12 @@ from docx2python import docx2python
 
 
 def extract(keyword, para_list):
-    '''按关键词提取内容'''
+    '''
+    按关键词提取内容
+    :param keyword: 字符串
+    :param para_list: 应匹配的母串
+    :return: 返回匹配成功的位置之后的所有段落的list
+    '''
     # 使用正则提取关键字后面的数字
     is_reference = False
     refer_list = []
@@ -29,7 +34,7 @@ def extract(keyword, para_list):
     return refer_list
 
 
-def checkNum(refer_list):
+def _checkNum(refer_list):
     print("对参考文献篇数进行检查")
     print("篇数为：" + str(len(refer_list)))
     if len(refer_list) < 20:
@@ -38,6 +43,10 @@ def checkNum(refer_list):
 
 
 def check(refer_list):
+    """
+    :param refer_list: 引用段落string格式的list
+    :return:  直接输出结果，无返回
+    """
     print("对参考文件进行格式检查")
     # 对引用部分提取匹配
     info_list = []
@@ -56,15 +65,17 @@ def check(refer_list):
     old = 0
     for idx, info in enumerate(info_list):
         if int(info[0]) != old + 1:
-            print("引用顺序有误:", refer_list[idx].text)
+            print("引用顺序有误:", refer_list[idx])
         old = int(info[0])
         if len(info) > 1:
             if (info[1] == 'J'):
-                print("引用了期刊：", refer_list[idx].text)
+                print("引用了期刊：", refer_list[idx])
         # TODO 其他检查
 
-    # print(result)
-    # return result
+    # 篇数检查
+    if not _checkNum(refer_list):
+        print("参考文献篇数少于20篇！")
+
 
 
 def main(path):
@@ -91,8 +102,6 @@ def main(path):
 
     # 可以输出reference看看，已经是text了
     reference = extract(keyword, content)
-    if not checkNum(reference):
-        print("参考文献篇数少于20篇！")
     check(reference)
 
 

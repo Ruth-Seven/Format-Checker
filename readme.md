@@ -8,5 +8,9 @@
 
 ## 工具
 
-python-docx > 0.8
+win32com
+docx2python
+```shell
+python -m pip install pywin32 docx2python
 
+```
